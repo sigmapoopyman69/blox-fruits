@@ -51,16 +51,9 @@ local function IsAllowedFruit(fruitName)
 end
 
 local function ServerHop()
-    game:GetService("TeleportService"):TeleportAsync(
-        game.PlaceId,
-        {
-            game:GetService("HttpService"):JSONDecode(
-                game:HttpGet(
-                    "https://roblox.com" .. game.PlaceId .. "/servers/Public?limit=10"
-                )
-            ).data[1].id
-        }
-    )
+    loadstring(game:HttpGet(
+        "https://raw.githubusercontent.com/LeoKholYt/roblox/main/lk_serverhop.lua"
+    ))()
 end
 
 local function IsFruit(tool)
