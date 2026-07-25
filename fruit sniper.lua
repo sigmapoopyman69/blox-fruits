@@ -20,22 +20,15 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
-
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
-
 local Status = self.Status
 local TweenStatus = self.TweenStatus
 local StoreStatus = self.StoringStatus
 local FruitType = self.FruitType
 local DistanceText = self.FruitDistance
-
-local TWEEN_SPEED = 500
-local ENABLE_ESP = true
-
 local AllFruits = {
     "Rocket Fruit","Spin Fruit","Blade Fruit","Spring Fruit","Bomb Fruit",
     "Smoke Fruit","Spike Fruit","Flame Fruit","Ice Fruit","Sand Fruit",
