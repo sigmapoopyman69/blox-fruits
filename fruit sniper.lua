@@ -195,11 +195,32 @@ end
 
 local function TweenTo(position)
     local distance = (HRP.Position - position).Magnitude
+
+    if distance > 15000 then
+        local teleportPos = Vector3.new(3952, 2, -1785)
+        local tpDistance = (HRP.Position - teleportPos).Magnitude
+        local tpTime = tpDistance / TWEEN_SPEED
+
+        local tpTween = TweenService:Create(
+            HRP,
+            TweenInfo.new(tpTime, Enum.EasingStyle.Linear),
+            {CFrame = CFrame.new(teleportPos)}
+        )
+
+        DistanceText.Text = 'Fruit Distance: <font color="rgb(255,255,255)" weight="Regular">'..math.floor(tpDistance)..'</font>'
+        TweenStatus.Text = 'Tweening Status: <font color="rgb(0,170,255)" weight="Regular">Tweening...</font>'
+
+        tpTween:Play()
+        tpTween.Completed:Wait()
+
+        distance = (HRP.Position - position).Magnitude
+    end
+
     local time = distance / TWEEN_SPEED
 
     local tween = TweenService:Create(
         HRP,
-        TweenInfo.new(time,Enum.EasingStyle.Linear),
+        TweenInfo.new(time, Enum.EasingStyle.Linear),
         {CFrame = CFrame.new(position)}
     )
 
