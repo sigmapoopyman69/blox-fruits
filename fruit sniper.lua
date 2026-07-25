@@ -13,6 +13,7 @@ local args = {
     [1] = "SetTeam",
     [2] = SETTINGS.Team
 }
+task.wait(0.3)
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
 
 local Players = game:GetService("Players")
@@ -32,7 +33,7 @@ local StoreStatus = self.StoringStatus
 local FruitType = self.FruitType
 local DistanceText = self.FruitDistance
 
-local TWEEN_SPEED = 250
+local TWEEN_SPEED = 500
 local ENABLE_ESP = true
 
 local AllFruits = {
