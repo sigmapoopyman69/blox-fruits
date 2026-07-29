@@ -19,7 +19,7 @@ repeat
     CommF:InvokeServer(unpack(args))
     task.wait(0.5)
 until Player.Team and Player.Team.Name == "Pirates"
-
+task.wait(1)
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
 local TWEEN_SPEED = 250
