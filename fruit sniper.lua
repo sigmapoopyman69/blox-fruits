@@ -1,3 +1,7 @@
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
 local AdminusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmapoopyman69/blox-fruits/refs/heads/main/gui.lua"))()
 local SETTINGS = _G.FruitSniperSettings or {
     Team = "Pirates",
@@ -13,6 +17,17 @@ local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
+
+-- Wait for the "CHOOSE YOUR SIDE" team select screen to show
+local playerGui = Player:WaitForChild("PlayerGui")
+repeat
+    task.wait(0.2)
+until playerGui:FindFirstChild("Main") 
+    and playerGui.Main:FindFirstChild("ChooseTeam") 
+    and playerGui.Main.ChooseTeam.Visible == true
+
+task.wait(0.4)
+
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 -- Non-blocking team set with safety cutoff
@@ -42,7 +57,7 @@ local GrabbedFruitsLabel = self.GrabbedFruitsLabel
 if not GrabbedFruitsLabel and Status and Status.Parent then
     GrabbedFruitsLabel = Instance.new("TextLabel")
     GrabbedFruitsLabel.Name = "GrabbedFruitsLabel"
-    GrabbedFruitsLabel.Size = UDim2.new(1, 0, 0, 30)
+    GrabbedFruitsLabel.Size = UDim2.new(1, 0, 0, 25)
     GrabbedFruitsLabel.BackgroundTransparency = 1
     GrabbedFruitsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     GrabbedFruitsLabel.TextStrokeTransparency = 0
@@ -52,10 +67,10 @@ if not GrabbedFruitsLabel and Status and Status.Parent then
     self.GrabbedFruitsLabel = GrabbedFruitsLabel
 end
 
--- Function to load & display logged fruits
+-- Read & render logged fruits from fruits.txt
 local function UpdateGrabbedFruitsUI()
     if not GrabbedFruitsLabel then return end
-    local textContent = "Fruits Grabbed: None"
+    local textContent = 'Fruits Grabbed: <font color="rgb(200,200,200)" weight="Regular">None</font>'
     if isfile("fruits.txt") then
         local rawData = readfile("fruits.txt")
         local lines = {}
@@ -63,13 +78,13 @@ local function UpdateGrabbedFruitsUI()
             table.insert(lines, line)
         end
         if #lines > 0 then
-            textContent = "Fruits Grabbed: " .. table.concat(lines, ", ")
+            textContent = 'Fruits Grabbed: <font color="rgb(0,255,0)" weight="Regular">' .. table.concat(lines, ", ") .. '</font>'
         end
     end
     GrabbedFruitsLabel.Text = textContent
 end
 
--- Function to record newly grabbed fruit
+-- Record newly grabbed fruit to fruits.txt
 local function LogGrabbedFruit(fruitName)
     local entry = fruitName .. " by " .. Player.Name
     if isfile("fruits.txt") then
@@ -80,7 +95,7 @@ local function LogGrabbedFruit(fruitName)
     UpdateGrabbedFruitsUI()
 end
 
--- Load fruit log on startup
+-- Load fruit log on execution
 UpdateGrabbedFruitsUI()
 
 local AllFruits = {
