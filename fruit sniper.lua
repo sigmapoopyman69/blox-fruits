@@ -1,8 +1,14 @@
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Player = Players.LocalPlayer
+local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
--- Wait for the team selection screen ("CHOOSE YOUR SIDE") to appear
 local playerGui = Player:WaitForChild("PlayerGui")
 repeat
     task.wait(0.2)
@@ -20,12 +26,7 @@ local args = {
     [1] = "SetTeam",
     [2] = SETTINGS.Team
 }
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = Players.LocalPlayer
-local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+
 
 -- Non-blocking team set with safety cutoff
 task.spawn(function()
