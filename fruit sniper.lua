@@ -7,18 +7,17 @@ local SETTINGS = _G.FruitSniperSettings or {
     Fruits = {}
 }
 
-local TEAM = SETTINGS.Team
+-- Retry loop to force team selection until confirmed
+local targetTeamName = SETTINGS.Team or "Pirates"
+local CommF = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_")
+local Player = game:GetService("Players").LocalPlayer
 
-local args = {
-    [1] = "SetTeam",
-    [2] = SETTINGS.Team
-}
-task.wait(0.3)
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
-task.wait(0.4)
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
-task.wait(0.8)
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
+repeat
+    task.wait(0.5)
+    pcall(function()
+        CommF:InvokeServer("SetTeam", targetTeamName)
+    end)
+until Player.Team and Player.Team.Name == targetTeamName or not task.wait(0.5) 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
@@ -29,11 +28,13 @@ local HRP = Character:WaitForChild("HumanoidRootPart")
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 local TWEEN_SPEED = 250
 local ENABLE_ESP = true
-local Status = self.Status
-local TweenStatus = self.TweenStatus
-local StoreStatus = self.StoringStatus
-local FruitType = self.FruitType
-local DistanceText = self.FruitDistance
+
+local Status = AdminusUI.Status
+local TweenStatus = AdminusUI.TweenStatus
+local StoreStatus = AdminusUI.StoringStatus
+local FruitType = AdminusUI.FruitType
+local DistanceText = AdminusUI.FruitDistance
+
 local AllFruits = {
     "Rocket Fruit","Spin Fruit","Blade Fruit","Spring Fruit","Bomb Fruit",
     "Smoke Fruit","Spike Fruit","Flame Fruit","Ice Fruit","Sand Fruit",
@@ -51,10 +52,10 @@ end
 
 local function ServerHop()
 local API, HttpService, TeleportService, CoreGui = nil, game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("CoreGui");
-local RemoveErrorPrompts = true --prevents error messages from popping up.
-local IterationSpeed = 0.25 --speed in which next server is picked for teleport (the higher it is the slower the teleports but more likely to work).
-local ExcludefullServers = true --slightly beneficial if the game is high ccu or mid ccu, if not, set to false.
-local SaveTeleportAttempts = false --saves every teleports that are attempted in jobid to "Attempts.txt" file
+local RemoveErrorPrompts = true
+local IterationSpeed = 0.25
+local ExcludefullServers = true
+local SaveTeleportAttempts = false
 local API = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?limit=100"
 
 local function EncodeToFile(JSONString)
@@ -69,11 +70,9 @@ if success and JSONData.data then
     if success then
         writefile("Servers.JSON", encoded)
     else
-        warn("Failed to encode JSON string.")
         return nil
     end
 else
-    warn("Failed to decode JSONData.")
     return nil
 end
 return JSONData
@@ -124,7 +123,6 @@ if isfile("Servers.JSON") then
     end)
     if success and JSONData then
         if JSONData.gameId ~= game.PlaceId then
-            warn("Game mismatch from cache, remaking cache for --> " .. game.PlaceId)
             SetMainPage()
         end
         if JSONData.data and #JSONData.data >= 1 then
@@ -134,7 +132,7 @@ if isfile("Servers.JSON") then
                 EncodeToFile(NextCursor(JSONData.nextPageCursor))
                 StartTeleport()
             else
-                SetMainPage() --no more pages left, start over
+                SetMainPage()
             end
         end
     else
@@ -144,6 +142,23 @@ else
     SetMainPage()
 end
 end
+
+-- WATCHDOG PATCH
+local STUCK_TEXT = 'Status: <font color="rgb(255,0,0)" weight="Regular">No allowed fruits found, server hopping...</font>'
+task.spawn(function()
+    local timer = 0
+    while task.wait(1) do
+        if Status and Status.Text == STUCK_TEXT then
+            timer = timer + 1
+            if timer >= 10 then
+                timer = 0
+                ServerHop()
+            end
+        else
+            timer = 0
+        end
+    end
+end)
 
 local function IsFruit(tool)
     return tool:IsA("Tool")
