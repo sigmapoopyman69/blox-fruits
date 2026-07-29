@@ -15,11 +15,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
-repeat
-    CommF:InvokeServer(unpack(args))
-    task.wait(0.5)
-until Player.Team and Player.Team.Name == "Pirates"
-task.wait(1)
+-- Non-blocking team set with safety cutoff
+task.spawn(function()
+    local attempts = 0
+    repeat
+        pcall(function()
+            CommF:InvokeServer(unpack(args))
+        end)
+        task.wait(0.5)
+        attempts = attempts + 1
+    until (Player.Team and Player.Team.Name == "Pirates") or attempts >= 10
+end)
+
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
 local TWEEN_SPEED = 250
@@ -29,6 +36,53 @@ local TweenStatus = self.TweenStatus
 local StoreStatus = self.StoringStatus
 local FruitType = self.FruitType
 local DistanceText = self.FruitDistance
+
+-- Setup or Attach Grabbed Fruits Label to GUI
+local GrabbedFruitsLabel = self.GrabbedFruitsLabel
+if not GrabbedFruitsLabel and Status and Status.Parent then
+    GrabbedFruitsLabel = Instance.new("TextLabel")
+    GrabbedFruitsLabel.Name = "GrabbedFruitsLabel"
+    GrabbedFruitsLabel.Size = UDim2.new(1, 0, 0, 30)
+    GrabbedFruitsLabel.BackgroundTransparency = 1
+    GrabbedFruitsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    GrabbedFruitsLabel.TextStrokeTransparency = 0
+    GrabbedFruitsLabel.TextScaled = true
+    GrabbedFruitsLabel.Font = Enum.Font.GothamBold
+    GrabbedFruitsLabel.Parent = Status.Parent
+    self.GrabbedFruitsLabel = GrabbedFruitsLabel
+end
+
+-- Function to load & display logged fruits
+local function UpdateGrabbedFruitsUI()
+    if not GrabbedFruitsLabel then return end
+    local textContent = "Fruits Grabbed: None"
+    if isfile("fruits.txt") then
+        local rawData = readfile("fruits.txt")
+        local lines = {}
+        for line in string.gmatch(rawData, "[^\r\n]+") do
+            table.insert(lines, line)
+        end
+        if #lines > 0 then
+            textContent = "Fruits Grabbed: " .. table.concat(lines, ", ")
+        end
+    end
+    GrabbedFruitsLabel.Text = textContent
+end
+
+-- Function to record newly grabbed fruit
+local function LogGrabbedFruit(fruitName)
+    local entry = fruitName .. " by " .. Player.Name
+    if isfile("fruits.txt") then
+        appendfile("fruits.txt", entry .. "\n")
+    else
+        writefile("fruits.txt", entry .. "\n")
+    end
+    UpdateGrabbedFruitsUI()
+end
+
+-- Load fruit log on startup
+UpdateGrabbedFruitsUI()
+
 local AllFruits = {
     "Rocket Fruit","Spin Fruit","Blade Fruit","Spring Fruit","Bomb Fruit",
     "Smoke Fruit","Spike Fruit","Flame Fruit","Ice Fruit","Sand Fruit",
@@ -267,7 +321,9 @@ local function StoreFruit(fruit)
         )
     end)
 
-    if not success then
+    if success then
+        LogGrabbedFruit(fruit.Name)
+    else
         StoreStatus.Text = 'Storing Status: <font color="rgb(255,255,0)" weight="Regular">Failed storing fruit... </font>'..err
     end
 end
@@ -311,4 +367,11 @@ local function Main()
     end
 end
 
-Main()
+task.spawn(function()
+    local success, err = pcall(Main)
+    if not success then
+        Status.Text = 'Status: <font color="rgb(255,0,0)" weight="Regular">Main error: '..tostring(err)..'</font>'
+        task.wait(2)
+        ServerHop()
+    end
+end)
