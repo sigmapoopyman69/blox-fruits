@@ -2,6 +2,14 @@ if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
+-- Wait for the team selection screen ("CHOOSE YOUR SIDE") to appear
+local playerGui = Player:WaitForChild("PlayerGui")
+repeat
+    task.wait(0.2)
+until playerGui:FindFirstChild("Main") 
+    and playerGui.Main:FindFirstChild("ChooseTeam") 
+    and playerGui.Main.ChooseTeam.Visible == true
+task.wait(0.4)
 local AdminusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmapoopyman69/blox-fruits/refs/heads/main/gui.lua"))()
 local SETTINGS = _G.FruitSniperSettings or {
     Team = "Pirates",
@@ -17,17 +25,6 @@ local Workspace = game:GetService("Workspace")
 local TweenService = game:GetService("TweenService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Player = Players.LocalPlayer
-
--- Wait for the "CHOOSE YOUR SIDE" team select screen to show
-local playerGui = Player:WaitForChild("PlayerGui")
-repeat
-    task.wait(0.2)
-until playerGui:FindFirstChild("Main") 
-    and playerGui.Main:FindFirstChild("ChooseTeam") 
-    and playerGui.Main.ChooseTeam.Visible == true
-
-task.wait(0.4)
-
 local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
 -- Non-blocking team set with safety cutoff
