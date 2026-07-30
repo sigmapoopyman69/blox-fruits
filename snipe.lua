@@ -111,6 +111,7 @@ local function StartTeleport()
         end
     end
 end
+end
 
 local function IsFruit(tool)
     return tool:IsA("Tool")
