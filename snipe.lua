@@ -1,99 +1,40 @@
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = Players.LocalPlayer
-local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
-task.wait(0.5)
-local playerGui = Player:WaitForChild("PlayerGui")
-repeat
-    task.wait(0.2)
-until (playerGui:FindFirstChild("Main") or playerGui:FindFirstChild("Main (minimal)"))
-    and (
-        (playerGui:FindFirstChild("Main") and playerGui.Main:FindFirstChild("ChooseTeam") and playerGui.Main.ChooseTeam.Title.Visible == true)
-        or (playerGui:FindFirstChild("Main (minimal)") and playerGui["Main (minimal)"]:FindFirstChild("ChooseTeam") and playerGui["Main (minimal)"].ChooseTeam.Title.Visible == true)
-    )
-task.wait(0.4)
-local AdminusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmapoopyman69/blox-fruits/refs/heads/main/gui.lua"))()
+task.wait(wait_time)
+local AdminusUI = loadstring(game:HttpGet(
+    "https://raw.githubusercontent.com/flerci42/Adminus_FruitSniper_V2/refs/heads/main/GraphicalUserInterface.lua"
+))()
+
 local SETTINGS = _G.FruitSniperSettings or {
     Team = "Pirates",
     Fruits = {}
 }
+
 local TEAM = SETTINGS.Team
+
 local args = {
     [1] = "SetTeam",
     [2] = SETTINGS.Team
 }
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
 
-task.spawn(function()
-    local attempts = 0
-    repeat
-        pcall(function()
-            CommF:InvokeServer(unpack(args))
-        end)
-        task.wait(0.5)
-        attempts = attempts + 1
-    until (Player.Team and Player.Team.Name == "Pirates") or attempts >= 10
-end)
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local HRP = Character:WaitForChild("HumanoidRootPart")
-local TWEEN_SPEED = 250
-local ENABLE_ESP = true
+
+local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+
 local Status = self.Status
 local TweenStatus = self.TweenStatus
 local StoreStatus = self.StoringStatus
 local FruitType = self.FruitType
 local DistanceText = self.FruitDistance
 
--- Setup or Attach Grabbed Fruits Label to GUI
-local GrabbedFruitsLabel = self.GrabbedFruitsLabel
-if not GrabbedFruitsLabel and Status and Status.Parent then
-    GrabbedFruitsLabel = Instance.new("TextLabel")
-    GrabbedFruitsLabel.Name = "GrabbedFruitsLabel"
-    GrabbedFruitsLabel.Size = UDim2.new(1, 0, 0, 25)
-    GrabbedFruitsLabel.BackgroundTransparency = 1
-    GrabbedFruitsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    GrabbedFruitsLabel.TextStrokeTransparency = 0
-    GrabbedFruitsLabel.TextScaled = true
-    GrabbedFruitsLabel.Font = Enum.Font.GothamBold
-    GrabbedFruitsLabel.Parent = Status.Parent
-    self.GrabbedFruitsLabel = GrabbedFruitsLabel
-end
-
--- Read & render logged fruits from fruits.txt
-local function UpdateGrabbedFruitsUI()
-    if not GrabbedFruitsLabel then return end
-    local textContent = 'Fruits Grabbed: <font color="rgb(200,200,200)" weight="Regular">None</font>'
-    if isfile("fruits.txt") then
-        local rawData = readfile("fruits.txt")
-        local lines = {}
-        for line in string.gmatch(rawData, "[^\r\n]+") do
-            table.insert(lines, line)
-        end
-        if #lines > 0 then
-            textContent = 'Fruits Grabbed: <font color="rgb(0,255,0)" weight="Regular">' .. table.concat(lines, ", ") .. '</font>'
-        end
-    end
-    GrabbedFruitsLabel.Text = textContent
-end
-
--- Record newly grabbed fruit to fruits.txt
-local function LogGrabbedFruit(fruitName)
-    local entry = fruitName .. " by " .. Player.Name
-    if isfile("fruits.txt") then
-        appendfile("fruits.txt", entry .. "\n")
-    else
-        writefile("fruits.txt", entry .. "\n")
-    end
-    UpdateGrabbedFruitsUI()
-end
-
--- Load fruit log on execution
-UpdateGrabbedFruitsUI()
+local TWEEN_SPEED = 250
+local ENABLE_ESP = true
 
 local AllFruits = {
     "Rocket Fruit","Spin Fruit","Blade Fruit","Spring Fruit","Bomb Fruit",
@@ -101,9 +42,9 @@ local AllFruits = {
     "Dark Fruit","Eagle Fruit","Diamond Fruit","Light Fruit","Rubber Fruit",
     "Ghost Fruit","Magma Fruit","Quake Fruit","Buddah Fruit","Love Fruit",
     "Creation Fruit","Spider Fruit","Sound Fruit","Pheonix Fruit","Portal Fruit",
-    "Lightning Fruit","Pain Fruit","Blizzard Fruit","Gravity Fruit","Mammoth Fruit",
-    "T-Rex Fruit","Dough Fruit","Shadow Fruit","Venom Fruit","Gas Fruit","Spirit Fruit",
-    "Tiger Fruit","Yeti Fruit","Kitsune Fruit","Control Fruit","Dragon Fruit"
+	"Lightning Fruit","Pain Fruit","Blizzard Fruit","Gravity Fruit","Mammoth Fruit",
+	"T-Rex Fruit","Dough Fruit","Shadow Fruit","Venom Fruit","Gas Fruit","Spirit Fruit",
+	"Tiger Fruit","Yeti Fruit","Kitsune Fruit","Control Fruit","Dragon Fruit"
 }
 
 local function IsAllowedFruit(fruitName)
@@ -171,41 +112,6 @@ local function StartTeleport()
     end
 end
 
-local function SetMainPage()
-    local MainPage = game:HttpGet(API)
-    writefile("Servers.JSON", MainPage)
-    StartTeleport()
-end
-
-if RemoveErrorPrompts then CoreGui:WaitForChild("RobloxGui"):WaitForChild("Modules"):WaitForChild("ErrorPrompt"):Destroy() CoreGui.RobloxPromptGui:Destroy() end
-
-if isfile("Servers.JSON") then
-    local success, JSONData = pcall(function()
-        return HttpService:JSONDecode(readfile("Servers.JSON"))
-    end)
-    if success and JSONData then
-        if JSONData.gameId ~= game.PlaceId then
-            warn("Game mismatch from cache, remaking cache for --> " .. game.PlaceId)
-            SetMainPage()
-        end
-        if JSONData.data and #JSONData.data >= 1 then
-            StartTeleport()
-        else
-            if success and JSONData.nextPageCursor then
-                EncodeToFile(NextCursor(JSONData.nextPageCursor))
-                StartTeleport()
-            else
-                SetMainPage() --no more pages left, start over
-            end
-        end
-    else
-        SetMainPage()
-    end
-else
-    SetMainPage()
-end
-end
-
 local function IsFruit(tool)
     return tool:IsA("Tool")
         and tool:FindFirstChild("Handle")
@@ -253,75 +159,19 @@ local function CreateESP(fruit)
 end
 
 local function TweenTo(position)
-    local distance = (HRP.Position - position).Magnitude
-
-    if distance > 15000 then
-        local teleportPos = Vector3.new(3952, 2, -1785)
-        local tpDistance = (HRP.Position - teleportPos).Magnitude
-        local tpTime = tpDistance / TWEEN_SPEED
-
-        local tpTween = TweenService:Create(
-            HRP,
-            TweenInfo.new(tpTime, Enum.EasingStyle.Linear),
-            {CFrame = CFrame.new(teleportPos)}
-        )
-
-        DistanceText.Text = 'Fruit Distance: <font color="rgb(255,255,255)" weight="Regular">'..math.floor(tpDistance)..'</font>'
-        TweenStatus.Text = 'Tweening Status: <font color="rgb(0,170,255)" weight="Regular">Tweening...</font>'
-
-        tpTween:Play()
-        
-        local lastTpPos = HRP.Position
-        local tpWatchdog = 0
-        while tpTween.PlaybackState == Enum.PlaybackState.Playing do
-            task.wait(0.5)
-            tpWatchdog = tpWatchdog + 0.5
-            if (HRP.Position - lastTpPos).Magnitude > 2 then
-                lastTpPos = HRP.Position
-                tpWatchdog = 0
-            end
-            if tpWatchdog >= 10 then
-                tpTween:Cancel()
-                ServerHop()
-                return false
-            end
-        end
-
-        distance = (HRP.Position - position).Magnitude
-    end
-
+    local distance = (HRP.Position - targetPos).Magnitude
     local time = distance / TWEEN_SPEED
 
     local tween = TweenService:Create(
         HRP,
-        TweenInfo.new(time, Enum.EasingStyle.Linear),
+        TweenInfo.new(time,Enum.EasingStyle.Linear),
         {CFrame = CFrame.new(position)}
     )
-
     DistanceText.Text = 'Fruit Distance: <font color="rgb(255,255,255)" weight="Regular">'..math.floor(distance)..'</font>'
     TweenStatus.Text = 'Tweening Status: <font color="rgb(0,170,255)" weight="Regular">Tweening...</font>'
-
     tween:Play()
-
-    local lastPos = HRP.Position
-    local watchdog = 0
-    while tween.PlaybackState == Enum.PlaybackState.Playing do
-        task.wait(0.5)
-        watchdog = watchdog + 0.5
-        if (HRP.Position - lastPos).Magnitude > 2 then
-            lastPos = HRP.Position
-            watchdog = 0
-        end
-        if watchdog >= 10 then
-            tween:Cancel()
-            Status.Text = 'Status: <font color="rgb(255,0,0)" weight="Regular">Stuck for 10s, server hopping...</font>'
-            ServerHop()
-            return false
-        end
-    end
-
+    tween.Completed:Wait()
     TweenStatus.Text = 'Tweening Status: <font color="rgb(0,255,0)" weight="Regular">Tweening done</font>'
-    return true
 end
 
 local function StoreFruit(fruit)
@@ -333,9 +183,7 @@ local function StoreFruit(fruit)
         )
     end)
 
-    if success then
-        LogGrabbedFruit(fruit.Name)
-    else
+    if not success then
         StoreStatus.Text = 'Storing Status: <font color="rgb(255,255,0)" weight="Regular">Failed storing fruit... </font>'..err
     end
 end
@@ -368,22 +216,12 @@ local function Main()
     Status.Text = 'Status: <font color="rgb(0,255,0)" weight="Regular">Fruit found</font>'
     FruitType.Text = 'Fruit Type: <font color="rgb(0,255,0)" weight="Regular">'..target.Name..'</font>'
 
-    if TweenTo(target.Handle.Position) then
-        task.wait(1)
-        StoreFruit(target)
-
-        StoreStatus.Text = 'Storing Status: <font color="rgb(0,255,0)" weight="Regular">Fruit Stored</font>'
-
-        task.wait(2)
-        ServerHop()
-    end
+    TweenTo(target.Handle.Position)
+    task.wait(1)
+    StoreFruit(target)
+    StoreStatus.Text = 'Storing Status: <font color="rgb(0,255,0)" weight="Regular">Fruit Stored</font>'
+    task.wait(2)
+    ServerHop()
 end
 
-task.spawn(function()
-    local success, err = pcall(Main)
-    if not success then
-        Status.Text = 'Status: <font color="rgb(255,0,0)" weight="Regular">Main error: '..tostring(err)..'</font>'
-        task.wait(2)
-        ServerHop()
-    end
-end)
+Main()
