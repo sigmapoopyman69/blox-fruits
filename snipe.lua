@@ -7,7 +7,7 @@ local CommF = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
-task.wait(0.4)
+task.wait(0.5)
 local playerGui = Player:WaitForChild("PlayerGui")
 repeat
     task.wait(0.2)
