@@ -11,9 +11,11 @@ end
 local playerGui = Player:WaitForChild("PlayerGui")
 repeat
     task.wait(0.2)
-until playerGui:FindFirstChild("Main") 
-    and playerGui.Main:FindFirstChild("ChooseTeam") 
-    and playerGui.Main.ChooseTeam.Visible == true
+until (playerGui:FindFirstChild("Main") or playerGui:FindFirstChild("Main (minimal)"))
+    and (
+        (playerGui:FindFirstChild("Main") and playerGui.Main:FindFirstChild("ChooseTeam") and playerGui.Main.ChooseTeam.Visible == true)
+        or (playerGui:FindFirstChild("Main (minimal)") and playerGui["Main (minimal)"]:FindFirstChild("ChooseTeam") and playerGui["Main (minimal)"].ChooseTeam.Visible == true)
+    )
 task.wait(0.4)
 local AdminusUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/sigmapoopyman69/blox-fruits/refs/heads/main/gui.lua"))()
 local SETTINGS = _G.FruitSniperSettings or {
